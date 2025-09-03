@@ -1,0 +1,451 @@
+<div class="submission-container">
+  <!-- Header Section -->
+   <div class="content-scroll">
+  <div class="header-section">
+    
+    
+    <div class="header-content">
+      <div class="submission-header"><button class="back-button" (click)="goBack()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      
+    </button>
+        <h1 class="submission-title">{{ submissionDetail?.email?.insured_name || 'Unknown Insured' }}</h1>
+        <span class="submission-id">{{ submissionDetail?.submission_id }}</span>
+      </div>
+    </div>
+
+    
+  <button style="float: right" class="btn-primary" (click)="openNotesPanel()">Take Notes</button>
+
+  </div>
+  <!-- Navigation Tabs -->
+  <div class="navigation-tabs">
+    <button 
+      *ngFor="let tab of tabs"
+      class="nav-tab"
+      [class.active]="activeTab === tab.id"
+      (click)="setActiveTab(tab.id)"
+    >
+      <span class="tab-icon">
+        <img [src]="activeTab === tab.id ? tab.iconActive : tab.icon" alt="{{ tab.label }} Icon">
+      </span>
+      <span class="tab-text">{{ tab.label }}</span>
+    </button>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <!-- Email Summary Tab -->
+    <div *ngIf="activeTab === 'email-summary'" class="content-panel">
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>Email Summary</h2>
+        </div>
+        <div class="email-content">
+          <!-- Structured Email Data -->
+          <div class="email-details-grid" *ngIf="submissionDetail?.email">
+            <div class="detail-group">
+              <h3>Submission Details</h3>
+              <div class="detail-row">
+                <span class="detail-label">Insured Name:</span>
+                <span class="detail-value">{{ submissionDetail.email.insured_name }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Broker Name:</span>
+                <span class="detail-value">{{ submissionDetail.email.broker_name }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Broker Email:</span>
+                <span class="detail-value email-link">{{ submissionDetail.email.broker_email }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Policy Effective Date:</span>
+                <span class="detail-value">{{ submissionDetail.email.policy_effective_date }}</span>
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <h3>Coverage Requirements</h3>
+              <div class="detail-row">
+                <span class="detail-label">Target Peril:</span>
+                <span class="detail-value">{{ submissionDetail.email.target_peril }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Target Coverages:</span>
+                <span class="detail-value">{{ submissionDetail.email.target_coverages }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Target Limits:</span>
+                <span class="detail-value">{{ submissionDetail.email.target_limits }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Target Sub-limits:</span>
+                <span class="detail-value">{{ submissionDetail.email.target_sub_limits }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Target Deductible:</span>
+                <span class="detail-value">{{ submissionDetail.email.target_deductible }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analysis Sections -->
+          <div class="analysis-sections" *ngIf="submissionDetail?.email?.analysis_sections">
+            <div class="section-divider">
+              <h3>Detailed Analysis</h3>
+            </div>
+            <div *ngFor="let section of submissionDetail.email.analysis_sections" class="analysis-card">
+              <h3 [innerHTML]="section.section_title"></h3>
+              <p class="narrative-text">{{ section.narrative }}</p>
+              
+              <div class="bullets-section">
+                <ul class="bullet-list">
+                  <li *ngFor="let bullet of getVisibleBullets(section.bullets); let i = index" 
+                      class="bullet-item">{{ bullet }}</li>
+                </ul>
+                
+                <button *ngIf="section.bullets.length > maxBullets" 
+                        class="see-more-btn"
+                        (click)="toggleBulletsExpanded(section)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path *ngIf="!section.expanded" 
+                          d="M19 9l-7 7-7-7" 
+                          stroke="currentColor" 
+                          stroke-width="2" 
+                          stroke-linecap="round" 
+                          stroke-linejoin="round"/>
+                    <path *ngIf="section.expanded" 
+                          d="M5 15l7-7 7 7" 
+                          stroke="currentColor" 
+                          stroke-width="2" 
+                          stroke-linecap="round" 
+                          stroke-linejoin="round"/>
+                  </svg>
+                  {{ section.expanded ? 'See Less' : 'See More' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insured Tab -->
+    <div *ngIf="activeTab === 'insured'" class="content-panel">
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>Insured Information</h2>
+        </div>
+        <div class="insured-content">
+          <app-markdown-parser 
+            [content]="submissionDetail?.insured"
+            (followUpSelected)="onFollowUpSelected($event)">
+          </app-markdown-parser>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOV Tab -->
+    <div *ngIf="activeTab === 'sov'" class="content-panel">
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>Statement of Values</h2>
+        </div>
+        <div class="sov-content">
+          <!-- <div class="sov-analysis">
+            <app-markdown-parser 
+              [content]="submissionDetail?.sov"
+              (followUpSelected)="onFollowUpSelected($event)">
+            </app-markdown-parser>
+          </div> -->
+          <!-- Analysis Sections -->
+
+
+          <!-- Charts Section -->
+          <div class="charts-section" *ngIf="submissionDetail?.sov?.sov_charts">
+            <div class="charts-grid">
+              <!-- Coverage Distribution Pie Chart -->
+              <div class="chart-card">
+  <h3>Coverage Distribution</h3>
+  <div class="chart-content">
+    <div class="chart-container">
+      <canvas #coverageChart width="300" height="300"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div *ngFor="let item of submissionDetail.sov.sov_charts.coverageData; let i = index" class="legend-item">
+        <div class="legend-color" [style.background-color]="chartColors[i]"></div>
+        <span class="legend-label">{{ item.Coverage }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Occupancy Distribution Pie Chart -->
+<div class="chart-card" *ngIf="submissionDetail.sov.sov_charts.occupancyData?.length">
+  <h3>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="gray" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Occupancy Distribution
+  </h3>
+  <div class="chart-content">
+    <div class="chart-container">
+      <canvas #occupancyChart width="300" height="300"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div *ngFor="let item of submissionDetail.sov.sov_charts.occupancyData; let i = index" class="legend-item">
+        <div class="legend-color" [style.background-color]="chartColors[i]"></div>
+        <span class="legend-label">{{ item.Occupancy }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Construction Distribution Pie Chart -->
+<div class="chart-card" *ngIf="submissionDetail.sov.sov_charts.constructionData?.length">
+  <h3>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" stroke="gray" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Construction Distribution
+  </h3>
+  <div class="chart-content">
+    <div class="chart-container">
+      <canvas #constructionChart width="300" height="300"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div *ngFor="let item of submissionDetail.sov.sov_charts.constructionData; let i = index" class="legend-item">
+        <div class="legend-color" [style.background-color]="chartColors[i]"></div>
+        <span class="legend-label">{{ item.Construction }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Year Built Distribution Pie Chart -->
+<div class="chart-card" *ngIf="submissionDetail.sov.sov_charts.yearBuiltData?.length">
+  <h3>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="gray" stroke-width="2"/>
+      <line x1="16" y1="2" x2="16" y2="6" stroke="gray" stroke-width="2"/>
+      <line x1="8" y1="2" x2="8" y2="6" stroke="gray" stroke-width="2"/>
+      <line x1="3" y1="10" x2="21" y2="10" stroke="gray" stroke-width="2"/>
+    </svg>
+    Year Built Distribution
+  </h3>
+  <div class="chart-content">
+    <div class="chart-container">
+      <canvas #yearBuiltChart width="300" height="300"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div *ngFor="let item of submissionDetail.sov.sov_charts.yearBuiltData; let i = index" class="legend-item">
+        <div class="legend-color" [style.background-color]="chartColors[i]"></div>
+        <span class="legend-label">{{ item.Year }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+            </div>
+          </div>
+
+          <!-- SOV Analysis -->
+          <div class="analysis-sections" *ngIf="submissionDetail?.sov?.analysis_sections">
+  <div class="section-divider">
+    <h3>Detailed Analysis</h3>
+  </div>
+  <div *ngFor="let section of submissionDetail.sov.analysis_sections" class="analysis-card">
+    <h3 [innerHTML]="section.section_title"></h3>
+    <p class="narrative-text">{{ section.narrative }}</p>
+    
+    <div class="bullets-section">
+      <ul class="bullet-list">
+        <li *ngFor="let bullet of getVisibleBullets(section.bullets); let i = index" 
+            class="bullet-item">{{ bullet }}</li>
+      </ul>
+      
+      <button *ngIf="section.bullets.length > maxBullets" 
+              class="see-more-btn"
+              (click)="toggleBulletsExpanded(section)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path *ngIf="!section.expanded" 
+                d="M19 9l-7 7-7-7" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round"/>
+          <path *ngIf="section.expanded" 
+                d="M5 15l7-7 7 7" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round"/>
+        </svg>
+        {{ section.expanded ? 'See Less' : 'See More' }}
+      </button>
+    </div>
+  </div>
+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loss Run Tab -->
+    <div *ngIf="activeTab === 'loss-run'" class="content-panel">
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>Loss Run Analysis</h2>
+        </div>
+        
+        <!-- Loss Trend Line Chart -->
+        <div class="chart-section">
+          <div class="chart-card">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M3 3v18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 12l4-4 4 4 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Loss Trend Analysis
+            </h3>
+            <div class="chart-container">
+              <canvas #lossRunChart width="600" height="300"></canvas>
+            </div>
+            
+            <!-- Summary Statistics -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value">{{ getTotalClaims() }}</div>
+                <div class="stat-label">Total Claims</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">${{ getTotalIncurred() | number:'1.0-0' }}</div>
+                <div class="stat-label">Total Incurred</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">${{ getAveragePerClaim() | number:'1.0-0' }}</div>
+                <div class="stat-label">Average per Claim</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analysis Sections -->
+        <div class="analysis-sections">
+          <div *ngFor="let section of submissionDetail?.loss_run?.analysis_sections" 
+               class="analysis-card">
+            <h3 [innerHTML]="section.section_title"></h3>
+            <p class="narrative-text">{{ section.narrative }}</p>
+            
+            <div class="bullets-section">
+              <ul class="bullet-list">
+                <li *ngFor="let bullet of getVisibleBullets(section.bullets); let i = index" 
+                    class="bullet-item">{{ bullet }}</li>
+              </ul>
+              
+              <button *ngIf="section.bullets.length > maxBullets" 
+                      class="see-more-btn"
+                      (click)="toggleBulletsExpanded(section)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path *ngIf="!section.expanded" 
+                        d="M19 9l-7 7-7-7" 
+                        stroke="currentColor" 
+                        stroke-width="2" 
+                        stroke-linecap="round" 
+                        stroke-linejoin="round"/>
+                  <path *ngIf="section.expanded" 
+                        d="M5 15l7-7 7 7" 
+                        stroke="currentColor" 
+                        stroke-width="2" 
+                        stroke-linecap="round" 
+                        stroke-linejoin="round"/>
+                </svg>
+                {{ section.expanded ? 'See Less' : 'See More' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Missing Information Tab -->
+    <div *ngIf="activeTab === 'missing-info'" class="content-panel">
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>Missing Information</h2>
+        </div>
+        <div class="missing-info-content">
+  <div class="missing-info-card">
+    <ul class="missing-info-list">
+      <li *ngFor="let item of submissionDetail?.missing_info?.info">
+        {{ item }}
+      </li>
+    </ul>
+  </div>
+</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Section -->
+  <div class="action-section" *ngIf="activeTab === 'missing-info'">
+    <div class="action-card">
+      <div class="action-content">
+        <h3>Next Steps</h3>
+        <p>I've analyzed this submission and identified missing critical information. Would you like me to generate a detailed request to the broker?</p>
+        <div class="action-buttons">
+          <button class="btn-secondary" (click)="openEmailPanel()">
+            Preview Request
+          </button>
+          <button class="btn-primary" (click)="onSendEmailToBroker()">
+            Send to Broker
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Chat Interface -->
+  <div class="chat-section">
+    <!-- <div class="chat-header">
+      <h3>💬 Ask Questions</h3>
+    </div> -->
+    
+    <div class="chat-messages" *ngIf="chatMessages.length > 0">
+      <div *ngFor="let message of chatMessages" 
+           class="message"
+           [class.user-message]="message.type === 'user'"
+           [class.bot-message]="message.type === 'bot'">
+        <div class="message-content">{{ message.content }}</div>
+        <div class="message-timestamp">{{ message.timestamp | date:'short' }}</div>
+      </div>
+    </div>
+
+    <app-chat-interface 
+      (messageSubmitted)="onSendMessage($event)"
+      placeholder="Ask follow-up questions about this submission...">
+    </app-chat-interface>
+  </div>
+</div>
+
+<!-- Email Preview Modal -->
+<app-email-preview-panel
+  [isOpen]="isEmailPanelOpen"
+      [submissionId]="selectedSubmissionId"
+      (close)="closeEmailPanel()"
+      (emailSent)="onEmailSent()">
+</app-email-preview-panel>
+<app-notes-panel
+      [isOpen]="isNotesPanelOpen"
+      [noteId]="selectedNoteId"
+      (close)="closeNotesPanel()">
+</app-notes-panel>
+<!-- Loading State -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <div class="loading-content">
+    <div class="loading-spinner"></div>
+    <p>Loading submission details...</p>
+  </div>
+</div>

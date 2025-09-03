@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "message": "Email sent successfully to broker",
+  "emailId": "EMAIL-2025-001",
+  "sentAt": "2025-01-15T16:30:00Z",
+  "recipient": "broker@insurancebrokers.com",
+  "subject": "Missing Information Required - 24-16 Queens Plaza South Condominium (CLM-2025-001)"
+}

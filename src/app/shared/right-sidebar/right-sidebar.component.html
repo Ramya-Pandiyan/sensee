@@ -1,0 +1,99 @@
+<div class="right-sidebar">
+  <div class="right-sidebar-content">
+    <div class="submissions-section">
+      <h3 class="section-title">📋 Submission Watchlist</h3>
+      <div class="watchlist-container">
+        <div 
+          *ngFor="let submission of submissions.watchlist" 
+          class="submission-card" [class]="getPriorityClass(submission.priority)"
+          (click)="onSubmissionClick(submission)"
+        >
+          <div class="submission-header">
+            <div class="submission-name">{{ submission.insuredName }}</div>
+            <div class="submission-priority" >
+              <!-- {{ submission.priority | uppercase }} -->
+                <!-- <span class="priority-dot" [class]="getPriorityClass(submission.priority)"></span> -->
+            </div>
+          </div>
+          <div class="submission-details">
+  <div class="submission-date">
+    Received on {{ submission.receivedDate | date:'MMM d, y' }}
+    <div class="reply-icon" *ngIf="submission.reply_count && submission.reply_count > 0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+    <path fill="blue" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+</svg>
+      <span class="reply-count">{{ submission.reply_count }}</span>
+    </div>
+  </div>
+  <!-- <div class="submission-priority" [class]="getPriorityClass(submission.priority)">
+    {{ submission.priority | uppercase }}
+  </div> -->
+</div>
+
+        </div>
+      </div>
+    </div>
+    
+    <div class="tabs-section">
+      <div class="tabs-nav">
+        <button 
+          class="tab-btn"
+          [class.active]="activeTab === 'due-today'"
+          (click)="setActiveTab('due-today')"
+        >
+          Approaching Deadline
+        </button>
+        <button 
+          class="tab-btn"
+          [class.active]="activeTab === 'needs-review'"
+          (click)="setActiveTab('needs-review')"
+        >
+          High Priority
+        </button>
+      </div>
+      
+      <div class="tab-content">
+        <div *ngIf="activeTab === 'due-today'" class="submissions-list">
+          <div 
+            *ngFor="let submission of submissions.dueToday" 
+            class="submission-card small" [class]="getPriorityClass(submission.priority)"
+            (click)="onSubmissionClick(submission)"
+          >
+            <div class="submission-name">{{ submission.insuredName }}</div>
+            <div class="submission-meta">
+              <span class="submission-time">Deadline: {{ submission.receivedDate | date:'MMM d, y' }}</span>
+              <!-- <span class="submission-priority" [class]="getPriorityClass(submission.priority)">
+                {{ submission.priority }}
+              </span> -->
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="activeTab === 'needs-review'" class="submissions-list">
+          <div 
+            *ngFor="let submission of submissions.needsReview" 
+            class="submission-card small" [class]="getPriorityClass(submission.priority)"
+            (click)="onSubmissionClick(submission)"
+          >
+            <div class="submission-name">{{ submission.insuredName }}</div>
+            <div class="submission-meta">
+<span class="submission-time">Received on
+  {{ submission.receivedDate | date:'MMM d, y' }}
+  <div class="reply-icon" *ngIf="submission.reply_count && submission.reply_count > 0">
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 4h16v16H4z"></path>
+      <polyline points="22,6 12,13 2,6"></polyline>
+    </svg>
+    <span class="reply-count">{{ submission.reply_count }}</span>
+  </div>
+</span>
+              <!-- <span class="submission-priority" [class]="getPriorityClass(submission.priority)">
+                {{ submission.priority }}
+              </span> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
