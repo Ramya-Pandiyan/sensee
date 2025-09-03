@@ -225,10 +225,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   chatHistory: any[] = [];
    @Output() underwritingClicked = new EventEmitter<void>();
-  onUnderwritingClick() {
-    this.underwritingClicked.emit();
-    this.commonService.emitUnderwritingClicked();
-  }
   
    private destroy$ = new Subject<void>();
 
@@ -293,13 +289,18 @@ private loadChatHistory(): void {
     this.isSubSidebarOpen = false;
   }
 
-  // onUnderwritingClick(): void {
-  //   // Trigger initial chat messages in dashboard
-  //   this.router.navigate(['/dashboard']);
-  // }
+  onUnderwritingClick(): void {
+    this.underwritingClicked.emit();
+    this.commonService.emitUnderwritingClicked();
+    this.router.navigate(['/home/underwriting/dashboard']);
+  }
+
+  onNewChatClick(): void {
+    this.router.navigate(['/home/new-chat']);
+  }
 
   onChatHistoryClick(chat: any): void {
-    this.router.navigate(['/dashboard/submission', chat.submissionId]);
+    this.router.navigate(['/home/chat', chat.id]);
   }
 
   onLogout(): void {

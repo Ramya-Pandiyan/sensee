@@ -826,7 +826,7 @@ export class SubmissionDetailComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   goBack(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/home/underwriting/dashboard']);
   }
 
 

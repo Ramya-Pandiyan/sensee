@@ -48,7 +48,7 @@ export class RightSidebarComponent implements OnInit, OnDestroy {
   }
 
   onSubmissionClick(submission: Submission): void {
-    this.router.navigate(['/dashboard/submission', submission.id]);
+    this.router.navigate(['/home/underwriting/submission', submission.id]);
   }
 
   setActiveTab(tab: string): void {
